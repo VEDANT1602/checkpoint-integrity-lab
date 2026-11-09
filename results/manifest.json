@@ -1,0 +1,14 @@
+{
+  "artifacts": {
+    "data/training.csv": "7cfa03ad5d60203a00150d87da68ce246684c9997ce0c8e8862dfd7e5019e73f",
+    "models/complete-step12.pt": "bf409da2f49644985eb2f0b1c2cc2c0d409ea8a845c282706fcd2d3300e61f93",
+    "models/resumed-model.pt": "7f8282ac4faa395152e3a37557c9db595a5d96321f77c746c125233b2a066572",
+    "results/loss-curves.csv": "f6468c76cca7d34969efb0a904cc501fa56509bbda702768a2dc0e1972e66f2c",
+    "results/metrics.json": "cf134cb88d466a22d9b7330219c0963a68acd2d0aac8cd081a68cd0d803d4ac7",
+    "results/report.md": "cd3afcf86dc98b7f752d8605f785c9d63d21108629a4d28d83e5ff0c22e8bb56"
+  },
+  "source": {
+    "lab.py": "ab8c2c947ad34bf324892e8ebffc34dcf1cf9fcb7738ca83e8091f3c64825bbc",
+    "run.py": "f30c49f63b16164a713d4c38acfdc3e3dbdec36c0a06b07b998b2f73e05d0921"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "checkpoint-integrity-lab",
+  "title": "Checkpoint Integrity Lab",
+  "source_collection": "500-project-index",
+  "source_entry_url": "https://github.com/ashishpatel26/500-AI-Machine-learning-Deep-learning-Computer-vision-NLP-Projects-with-code/blob/5f104458e9e081bf0b24df78bbe3bc839edca899/README.md",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "Optimizer state",
+    "Checkpoint recovery",
+    "Artifact integrity"
+  ],
+  "problem": "Resume the same training trajectory after rejecting newer incomplete or corrupt snapshots.",
+  "limitations": "Small same-version deterministic CPU experiment; no Ray/FSDP/GPU/distributed or power-loss validation.",
+  "test_count": 10,
+  "test_command": "python -m unittest discover -s tests -v",
+  "run_command": "python run.py --output runs/ci"
+}

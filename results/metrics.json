@@ -1,0 +1,24 @@
+{
+  "device": "CPU",
+  "torch_version": "2.9.1+cpu",
+  "examples": 256,
+  "training_steps": 40,
+  "batch_size": 64,
+  "resume_step": 12,
+  "checkpoint_candidates": 3,
+  "rejected_candidates": [
+    {
+      "directory": "step-0028",
+      "reason": "incomplete checkpoint"
+    },
+    {
+      "directory": "step-0020",
+      "reason": "payload digest or length differs"
+    }
+  ],
+  "full_resume_max_parameter_difference": 0.0,
+  "full_resume_max_loss_difference": 0.0,
+  "weights_only_max_parameter_difference": 0.40573614835739136,
+  "optimizer_without_rng_max_parameter_difference": 0.26149800419807434,
+  "scope": "same-version CPU deterministic dropout/minibatch experiment; no Ray/FSDP/GPU or killed-process/power-loss claim"
+}
