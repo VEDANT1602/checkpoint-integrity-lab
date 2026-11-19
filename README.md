@@ -1,29 +1,29 @@
 # Checkpoint Integrity Lab
 
-The run resumes at step 12 even though there are directories for steps 20 and 28. The reader finds an unfinished write at step 28, then a payload at step 20 whose length or digest disagrees with its manifest. Step 12 is the first candidate that passes all checks. The saved result includes the rejection reason for each directory. [Candidate decisions](results/metrics.json)
+Think of restoring a backup. First you check which copy opens. Then you find out whether you can actually pick up where you left off. For a training run I can test that second part by comparing each update after the restart with an uninterrupted run.
 
-Finding an intact file only answers half the recovery question. At step 12, which state does Adam need to follow the uninterrupted run for 28 more updates? The experiment restores weights alone, then adds optimizer state, then restores the CPU random state used by dropout and minibatch sampling. Each run uses the same 6–16–2 network on 256 synthetic examples. [Checkpoint reader and writer](lab.py)
+I gave the loader three candidates. Step 28 was missing its completion record. A file at step 20 had been truncated after the checkpoint was saved. The loader checked the candidates newest first, logged why it rejected both, and opened step 12. That's the checkpoint I used for the next 28 updates. [Candidate decisions](results/metrics.json) · [Reader and writer](lab.py)
 
-| State restored at step 12 | Maximum absolute parameter difference at step 40 |
-| --- | ---: |
-| Weights, Adam state and CPU Torch RNG | 0.000000 |
-| Weights only | 0.405736 |
-| Weights and Adam state, RNG omitted | 0.261498 |
+## What I got back at step 40
 
-The full restore also reproduces the loss sequence in the recorded PyTorch 2.9.1 CPU environment. The [loss curves](results/loss-curves.csv) and [parity and corruption tests](tests/test_checkpoint.py#L26) show exactly what is compared. The complete [step-12 artifact](models/complete-step12.pt) and [resumed weights](models/resumed-model.pt) are included.
+I trained the same 6–16–2 network on 256 synthetic examples, then changed what I restored from step 12. With weights alone, the largest absolute difference between a resumed parameter and its uninterrupted counterpart reached **0.405736** at step 40. Restoring Adam's state brought the difference down to **0.261498**. Both runs loaded the weights successfully.
 
-These faults are simulated by orderly local writes. They leave process termination, power loss, multi-host storage and GPU or distributed replay unmeasured. The loader trusts its local checkpoint source and uses CPU mapping with `weights_only=True`. Byte hashes verify the payload against the manifest supplied alongside it.
-
-A useful next experiment would terminate the writer mid-save on the target filesystem and inspect which bytes survive a fresh process. The current fault fixtures deliberately create known partial states.
+Dropout and minibatch sampling also draw from the CPU Torch random generator. When I restored its state alongside the weights and Adam state, every subsequent loss matched the uninterrupted run and the maximum parameter difference at step 40 was **zero**. The comparison used PyTorch 2.9.1 on CPU. [Loss curves](results/loss-curves.csv) · [Parity and corruption tests](tests/test_checkpoint.py#L26) · [Step-12 checkpoint](models/complete-step12.pt) · [Resumed weights](models/resumed-model.pt)
 
 ## Reproduce the recovery
 
-Use a Python 3.11 environment with the pinned CPU build of PyTorch. The runner creates the damaged candidates in a temporary directory.
+Use Python 3.11 and the pinned CPU build of PyTorch. The runner creates the two damaged candidates in a temporary directory.
 
 ```bash
 python -m pip install -r requirements.txt
 python -m unittest discover -s tests -v
 python run.py --output runs/local
 ```
+
+## Notes to self
+
+On the next run I'd kill the writer during a save on the filesystem I'm targeting, start a fresh process and inspect what survived. Here I deliberately created two known failure states with orderly writes. A power loss or interrupted write on shared storage could leave a different set of files.
+
+The loader uses CPU mapping and `weights_only=True`. It checks the payload against the manifest stored beside it, which assumes the checkpoint source is trusted. GPU and distributed runs would also need their own replay tests.
 
 [Data card](docs/data-card.md) · [Run manifest](results/manifest.json) · [Source and contribution notes](docs/provenance.md)
