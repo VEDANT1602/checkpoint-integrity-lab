@@ -1,8 +1,8 @@
 # Checkpoint Integrity Lab
 
-Three checkpoint directories claim to contain training steps 12, 20 and 28. The step-20 payload was truncated after publication. The step-28 writer stopped before publishing its manifest and completion marker. The reader rejects both and resumes from step 12. [Candidate decisions](results/metrics.json)
+The run resumes at step 12 even though there are directories for steps 20 and 28. The reader finds an unfinished write at step 28, then a payload at step 20 whose length or digest disagrees with its manifest. Step 12 is the first candidate that passes all checks. The saved result includes the rejection reason for each directory. [Candidate decisions](results/metrics.json)
 
-The [reader and writer](lab.py) bind the completion marker to the manifest, check payload size and hash, and validate architecture and state before loading it. Training uses a 6–16–2 network with dropout, Adam and random minibatches on 256 synthetic examples. At step 40, each recovery path can be compared with uninterrupted training on the same CPU.
+Finding an intact file only answers half the recovery question. At step 12, which state does Adam need to follow the uninterrupted run for 28 more updates? The experiment restores weights alone, then adds optimizer state, then restores the CPU random state used by dropout and minibatch sampling. Each run uses the same 6–16–2 network on 256 synthetic examples. [Checkpoint reader and writer](lab.py)
 
 | State restored at step 12 | Maximum absolute parameter difference at step 40 |
 | --- | ---: |
@@ -13,6 +13,8 @@ The [reader and writer](lab.py) bind the completion marker to the manifest, chec
 The full restore also reproduces the loss sequence in the recorded PyTorch 2.9.1 CPU environment. The [loss curves](results/loss-curves.csv) and [parity and corruption tests](tests/test_checkpoint.py#L26) show exactly what is compared. The complete [step-12 artifact](models/complete-step12.pt) and [resumed weights](models/resumed-model.pt) are included.
 
 These faults are simulated by orderly local writes. They leave process termination, power loss, multi-host storage and GPU or distributed replay unmeasured. The loader trusts its local checkpoint source and uses CPU mapping with `weights_only=True`. Byte hashes verify the payload against the manifest supplied alongside it.
+
+A useful next experiment would terminate the writer mid-save on the target filesystem and inspect which bytes survive a fresh process. The current fault fixtures deliberately create known partial states.
 
 ## Reproduce the recovery
 
